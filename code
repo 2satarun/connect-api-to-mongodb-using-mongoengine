@@ -1,0 +1,51 @@
+from wsgiref.simple_server import make_server
+import falcon
+import json
+from mongoengine import connect
+from mongoengine.document import Document
+from mongoengine import Document, StringField, DateTimeField#EmailField, IntField       @import datetime 
+import datetime
+connect(db="mongoengine", host="localhost", port=27017)
+
+class User(Document):                                          # User collection 
+    name = StringField(required=True)
+    time  = DateTimeField(default=datetime.datetime.now)                 #it's a default date time and also return present time
+class Abc():
+
+    def on_get(self, req, resp):
+        """Handles GET requests"""
+        resp.status = falcon.HTTP_200  
+        resp.content_type = falcon.MEDIA_JSON
+        l=[]                                             #simple list 
+        for y in User.objects:                           #loop is find all documents in User.objects
+            z=str(y.time)                                #z= y.time   because time not str so convert in str then assign z
+            x={
+            "name":y.name,                               #y.name is having name that already define in User(Document)
+            "time":z
+            }
+            l.append(x)
+            resp.media=l
+    def on_post(self, req, resp):
+
+         """Handles post requests"""
+         resp.status = falcon.HTTP_200  
+         resp.content_type = falcon.MEDIA_JSON
+         x=(req.media.get('name'))                       #when this save automatically save time bcoz already declare name and time
+         User(name =x ).save()
+         
+         resp.media = {"result" : "done"}
+
+app = falcon.App()
+
+
+appi = Abc()
+
+
+app.add_route('/Abc', appi)
+
+if __name__ == '__main__':
+    with make_server('', 8000, app) as httpd:
+        print('Serving on port 8000...')
+
+        
+        httpd.serve_forever()
